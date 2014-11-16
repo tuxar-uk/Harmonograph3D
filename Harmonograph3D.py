@@ -1,22 +1,23 @@
 #!/usr/bin/python
 '''    3D Spectral Harmonographs   Copyright 2014 Alan Richmond (Tuxar.uk)
+
     Uses Vpython. Hold down right mouse button and move mouse or trackball to rotate.
     Press any key for next harmonograph (e.g. space bar).
     MIT License.
 '''
 from visual import *
 from math import sin
-import sys, random as r
+import random as r
 
-width,height=1280,720       # YouTube HD
+#width,height=1280,720       # YouTube HD
 #width,height=1920,1080      # my left monitor
 width,height=1280,1024      # my right monitor
-depth=1080
-hui=.159
-dec=0.99996
-dt=0.01
-mx=4
-sd=0.005
+depth=1080                  # 3d
+hui=.159                    # hue increment
+dec=0.99996                 # decay factor
+dt=0.01                     # time increment
+mx=4                        # amplitude & frequency ranges (-/+)
+sd=0.005                    # standard deviations (frequency spread)
 #   Amplitudes & scales
 def scale(length):
     while True:
@@ -24,10 +25,11 @@ def scale(length):
         max=abs(a1)+abs(a2)
         if max>0: break
     return a1,a2,length/(2*max)
-while True:
+while True:                             # Main loop
     d=display(title='3D Spectral Harmonograph',width=width,height=height)
     trail=curve()
-    d .visible=True
+    d.visible=True
+    #   Amplitudes & scales
     ax1,ax2,xscale=scale(width)
     ay1,ay2,yscale=scale(height)
     az1,az2,zscale=scale(depth)
@@ -54,6 +56,7 @@ while True:
         if not first: trail=curve(pos=(x,y,z),color=color.hsv_to_rgb((hue,1,1)))
         for i in range (1000):
             rate(100000)
+            #   Each pendulum axis is sum of 2 independent frequencies
             x = xscale * k * (ax1*sin(t * fx1 + px1) + ax2*sin(t * fx2 + px2))
             y = yscale * k * (ay1*sin(t * fy1 + py1) + ay2*sin(t * fy2 + py2))
             z = zscale * k * (az1*sin(t * fz1 + pz1) + az2*sin(t * fz2 + pz2))
