@@ -9,15 +9,16 @@ from visual import *
 from math import sin
 import random as r
 
-#width,height=1280,720       # YouTube HD
+width,height=1280,720       # YouTube HD
 #width,height=1920,1080      # my left monitor
-width,height=1280,1024      # my right monitor
-depth=1080                  # 3d
+#width,height=1280,1024      # my right monitor
+#depth=height                # 3d
+depth=width
 hui=.159                    # hue increment
-dec=0.99996                 # decay factor
+dec=0.99998                 # decay factor
 dt=0.01                     # time increment
 mx=4                        # amplitude & frequency ranges (-/+)
-sd=0.005                    # standard deviations (frequency spread)
+sd=0.002                    # standard deviations (frequency spread)
 #   Amplitudes & scales
 def scale(length):
     while True:
@@ -25,10 +26,13 @@ def scale(length):
         max=abs(a1)+abs(a2)
         if max>0: break
     return a1,a2,length/(2*max)
+
+d=display(title='3D Spectral Harmonograph',width=width,height=height)
 while True:                             # Main loop
-    d=display(title='3D Spectral Harmonograph',width=width,height=height)
-    trail=curve()
-    d.visible=True
+    f=frame()
+    f.axis=(0,1,0)
+    trail=curve(frame=f)
+    trail.visible=True
     #   Amplitudes & scales
     ax1,ax2,xscale=scale(width)
     ay1,ay2,yscale=scale(height)
@@ -52,8 +56,8 @@ while True:                             # Main loop
     #   Note that there are 2 nested loops here, where 1 should suffice BUT curve() only takes
     #   1000 points before dropping some. See bottom of http://vpython.org/contents/docs/curve.html
     #   My solution is to start a new trail every 1000 points.
-    for j in range (50):
-        if not first: trail=curve(pos=(x,y,z),color=color.hsv_to_rgb((hue,1,1)))
+    for j in range (100):
+        if not first: trail=curve(frame=f,pos=(x,y,z),color=color.hsv_to_rgb((hue,1,1)))
         for i in range (1000):
             rate(100000)
             #   Each pendulum axis is sum of 2 independent frequencies
@@ -61,9 +65,12 @@ while True:                             # Main loop
             y = yscale * k * (ay1*sin(t * fy1 + py1) + ay2*sin(t * fy2 + py2))
             z = zscale * k * (az1*sin(t * fz1 + pz1) + az2*sin(t * fz2 + pz2))
             trail.append(pos=(x,y,z),color=color.hsv_to_rgb((hue,1,1)))
+            f.rotate(angle=0.00005)
             hue = (hue + dt*hui) % 360      # cycle hue
             t+=dt
             first=False
             k*=dec
-    key = d.kb.getkey() # wait for and get keyboard info
-    trail.visible=0
+#    key = d.kb.getkey() # wait for and get keyboard info
+    #   This is clunky - I don't know what I'm doing but it works...
+    for obj in d.objects:
+        obj.visible = False
